@@ -1,0 +1,84 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* Prevent body from scrolling */
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.music-container {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+
+.left-panel,
+.right-panel {
+  background-color: lightblue;
+  width: 250px;
+  margin: 7px;
+  display: flex;
+  flex-direction: column;
+}
+
+.left-panel {
+  height: 100%;
+}
+
+.right-panel {
+  flex-shrink: 0;
+}
+
+.home-and-search-container {
+  height: 100px;
+  background-color: gray;
+}
+
+.playlist-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent overflow in container */
+}
+
+.playlist-main {
+  height: 50px;
+  background-color: lightgreen;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 16px;
+  margin-bottom: 20px;
+}
+
+.playlist-listing {
+  flex: 1;
+  background-color: lightpink;
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.playlist-1,
+.playlist-2 {
+  background-color: black;
+  border: 1px solid white;
+  width: 100%;
+  height: 50px;
+  color: white;
+}
+
+.main-panel {
+  background-color: lightpink;
+  flex: 1;
+}
+
+.music-player {
+  background-color: black;
+  color: white;
+  height: 100px;
+  flex-shrink: 0;
+}
