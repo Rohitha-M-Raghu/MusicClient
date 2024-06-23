@@ -220,29 +220,12 @@ function renderPlaylistSongs(playlistId) {
         return response.json();
       } else if (response.status === 204) {
         // SHow no content
-        const mainContentElement = document.querySelector(
-          ".js-main-panel-body"
-        );
-        mainContentElement.innerHTML = `<div class="no-song-msg">No Songs In Playlist</div>`;
+        displayNoSongsInMain();
       } else {
         throw new Error("Network response was not ok");
       }
     })
     .then((responseData) => {
-      let songDetailsHTML = `
-    <button class="play-btn">
-        <i class="fa-solid fa-play"></i>
-    </button>
-    <div class="song-list-heading">
-        <div class="song-count">#</div>
-        <div>Title</div>
-        <div>Artist</div>
-        <div>
-            <i class="fa-regular fa-clock"></i>
-        </div>
-    </div>
-    <div class="song-list">";
-  `;
       const songs = responseData.data.map(
         (song) =>
           new Song(
@@ -255,23 +238,7 @@ function renderPlaylistSongs(playlistId) {
             song.songUrl
           )
       );
-      songs.forEach((songDetails, index) => {
-        songDetailsHTML += `
-        <button class="song-details">
-            <div class="song-number">${index + 1}</div>
-            <div class="song-data">
-                <img src="${songDetails.coverUrl}" width="40px">
-                <div class="song-name">${songDetails.songTitle}</div>
-            </div>
-            <div class="artist-name">${songDetails.artistName}</div>
-            <div class="duration">${songDetails.formatDuration()}</div>
-        </button>
-        `;
-      });
-
-      songDetailsHTML += "</div>";
-      const songDetailsRender = document.querySelector(".js-main-panel-body");
-      songDetailsRender.innerHTML = songDetailsHTML;
+      renderSongListInMain(songs);
     })
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);
@@ -377,20 +344,6 @@ function renderLikedSongs() {
       }
     })
     .then((responseData) => {
-      let songDetailsHTML = `
-    <button class="play-btn">
-        <i class="fa-solid fa-play"></i>
-    </button>
-    <div class="song-list-heading">
-        <div class="song-count">#</div>
-        <div>Title</div>
-        <div>Artist</div>
-        <div>
-            <i class="fa-regular fa-clock"></i>
-        </div>
-    </div>
-    <div class="song-list">";
-  `;
       const songs = responseData.data.map(
         (song) =>
           new Song(
@@ -403,23 +356,7 @@ function renderLikedSongs() {
             song.songUrl
           )
       );
-      songs.forEach((songDetails, index) => {
-        songDetailsHTML += `
-        <button class="song-details">
-            <div class="song-number">${index + 1}</div>
-            <div class="song-data">
-                <img src="${songDetails.coverUrl}" width="40px">
-                <div class="song-name">${songDetails.songTitle}</div>
-            </div>
-            <div class="artist-name">${songDetails.artistName}</div>
-            <div class="duration">${songDetails.formatDuration()}</div>
-        </button>
-        `;
-      });
-
-      songDetailsHTML += "</div>";
-      const songDetailsRender = document.querySelector(".js-main-panel-body");
-      songDetailsRender.innerHTML = songDetailsHTML;
+      renderSongListInMain(songs);
     })
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);
@@ -427,6 +364,11 @@ function renderLikedSongs() {
 }
 
 function renderSongListInMain(songs) {
+  if (!songs) {
+    displayNoSongsInMain();
+    return;
+  }
+
   let songDetailsHTML = `
     <button class="play-btn">
         <i class="fa-solid fa-play"></i>
@@ -458,4 +400,9 @@ function renderSongListInMain(songs) {
   songDetailsHTML += "</div>";
   const songDetailsRender = document.querySelector(".js-main-panel-body");
   songDetailsRender.innerHTML = songDetailsHTML;
+}
+
+function displayNoSongsInMain() {
+  const mainContentElement = document.querySelector(".js-main-panel-body");
+  mainContentElement.innerHTML = `<div class="no-song-msg">No Songs In Playlist</div>`;
 }
