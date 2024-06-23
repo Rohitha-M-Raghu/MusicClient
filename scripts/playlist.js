@@ -14,6 +14,7 @@ class Playlist {
 (async () => {
   async function initialize() {
     await getPlaylistListingInMain();
+    await setCurrentPlayingSongInPlayer();
   }
 
   if (document.readyState === "loading") {
@@ -26,6 +27,40 @@ class Playlist {
 //
 // List Playlists at left panel
 //
+
+function setCurrentPlayingSongInPlayer() {
+  fetch("http://localhost:8888/MusicPlayer/api/v1/songs/nowPlaying", {
+    method: "GET",
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else if (response.status === 204) {
+        return null;
+      } else {
+        throw new Error("Network response was not ok");
+      }
+    })
+    .then((responseData) => {
+      const {
+        songId,
+        songTitle,
+        artist: { artistName },
+        duration,
+        songUrl,
+        imageUrl,
+      } = responseData;
+      const songDetails = new Song(
+        songId,
+        songTitle,
+        artistName,
+        duration,
+        songUrl,
+        imageUrl
+      );
+      songDetails.loadSongDetailsIntoMusicPlayer();
+    });
+}
 
 function getPlaylistListingInMain() {
   fetch("http://localhost:8888/MusicPlayer/api/v1/playlists", {
