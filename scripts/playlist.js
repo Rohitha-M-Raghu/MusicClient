@@ -8,36 +8,46 @@ class Playlist {
   }
 }
 
-const playlistListingData = [
-  {
-    playlistId: 5,
-    playlistName: "Playlist1",
-    imgUrl: "images/liked-playlist.png",
-    songCount: 6,
-  },
-  {
-    playlistId: 16,
-    playlistName: "My Playlist#1",
-    imgUrl: "images/liked-playlist.png",
-    songCount: 10,
-  },
-].map(
-  (playlist) =>
-    new Playlist(
-      playlist.playlistId,
-      playlist.playlistName,
-      playlist.imgUrl,
-      playlist.songCount
-    )
-);
-
-renderPlaylistListing(playlistListingData);
+// on load of music.html
+getPlaylistListingInMain();
 
 //
 // List Playlists at left panel
 //
-function renderPlaylistListing(playlistListingData) {
+
+function getPlaylistListingInMain() {
+  fetch("http://localhost:8888/MusicPlayer/api/v1/playlists", {
+    method: "GET",
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else if (response.status === 204) {
+        return null;
+      } else {
+        throw new Error("Network response was not ok");
+      }
+    })
+    .then((responseData) => {
+      const playlistListingData = responseData.data.map(
+        (playlist) =>
+          new Playlist(
+            playlist.playlistId,
+            playlist.playlistName,
+            playlist.imgUrl,
+            playlist.songCount
+          )
+      );
+      renderPlaylistListing(playlistListingData);
+    })
+    .catch((error) => {
+      console.error("There was a problem with the fetch operation:", error);
+    });
+}
+
+async function renderPlaylistListing(playlistListingData) {
   const playlistListContainer = document.querySelector(".playlist-listing");
+  const likedSongCount = await getLikedSongCount();
   let htmlContent = `
     <button class="playlist-container js-playlist-container">
       <div class="playlist-cover js-playlist-cover">
@@ -48,7 +58,7 @@ function renderPlaylistListing(playlistListingData) {
               Liked Playlist
           </div>
           <div class="playlist-song-details">
-              Playlist &#183; ${getLikedSongCount()} songs
+              Playlist &#183; ${likedSongCount} songs
           </div>
       </div>
   </button>
@@ -247,80 +257,29 @@ function renderPlaylistSongs(playlistId) {
 
 // Function to get liked Songs
 function getLikedSongCount() {
-  const responseBody = {
-    data: [
-      {
-        duration: "00:04:43",
-        songTitle: "Diamonds",
-        songDurationInSecs: 283000,
-        artist: {
-          country: "Barbados",
-          genre: "Pop",
-          description:
-            'A Barbadian singer and businesswoman known for hits like "Umbrella" and "Diamonds."',
-          artistName: "Rihanna",
-          artistId: 1,
-        },
-        count: 0,
-        genre: "Pop",
-        songId: 1,
-        order: 0,
-      },
-      {
-        duration: "00:00:10",
-        songTitle: "Wagon Wheel",
-        songDurationInSecs: 10000,
-        artist: {
-          country: "USA",
-          genre: "Country",
-          description:
-            "Darius Rucker is a versatile country artist with a distinctive voice and a wide following.",
-          artistName: "Darius Rucker",
-          artistId: 5,
-        },
-        count: 0,
-        genre: "Country",
-        songId: 5,
-        order: 0,
-      },
-      {
-        duration: "00:00:20",
-        songTitle: "Shape of You'",
-        songDurationInSecs: 20000,
-        artist: {
-          country: "UK",
-          genre: "Pop",
-          description:
-            "Ed Sheeran is a popular pop artist known for his heartfelt lyrics and acoustic melodies.",
-          artistName: "Ed Sheeran",
-          artistId: 9,
-        },
-        count: 0,
-        genre: "Pop",
-        songId: 9,
-        order: 0,
-      },
-      {
-        duration: "00:00:20",
-        songTitle: "All of the Lights",
-        songDurationInSecs: 20000,
-        artist: {
-          country: "USA",
-          genre: "Pop",
-          description:
-            'An American rapper and producer acclaimed for his innovative music and albums like "The College Dropout."',
-          artistName: "Kanye West",
-          artistId: 11,
-        },
-        count: 0,
-        genre: "Pop",
-        songId: 11,
-        order: 0,
-      },
-    ],
-  };
-  const count = responseBody.data.length;
-  return count;
+  return fetch(`http://localhost:8888/MusicPlayer/api/v1/liked-songs`, {
+    method: "GET",
+  })
+    .then((response) => {
+      if (response.status === 200) {
+        return response.json();
+      } else if (response.status === 204) {
+        return null;
+      } else {
+        throw new Error("Network response was not ok");
+      }
+    })
+    .then((responseData) => {
+      if (!responseData) {
+        return 0;
+      } else {
+        return responseData.data.length;
+      }
+    })
+    .catch((error) => {
+      console.error("There was a problem with the fetch operation:", error);
+      return 0;
+    });
 }
 
 // code to render playlistSongs
