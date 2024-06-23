@@ -10,13 +10,13 @@ class Playlist {
 
 const playlistListingData = [
   {
-    playlistId: 1,
+    playlistId: 5,
     playlistName: "Playlist1",
     imgUrl: "images/liked-playlist.png",
     songCount: 6,
   },
   {
-    playlistId: 2,
+    playlistId: 16,
     playlistName: "My Playlist#1",
     imgUrl: "images/liked-playlist.png",
     songCount: 10,
@@ -89,8 +89,13 @@ function renderPlaylistListing(playlistListingData) {
     button.addEventListener("click", () => {
       const playlistName = button.querySelector(".playlist-name").innerText;
       renderPlaylistHeading(playlistName);
-      renderPlaylistSongs();
-      console.log("Button working");
+      if (playlistName === "Liked Playlist") {
+        // call method to render liked songs
+        renderLikedSongs();
+      } else {
+        const playlistId = button.dataset.playlistId;
+        renderPlaylistSongs(playlistId);
+      }
     });
   });
 }
@@ -113,7 +118,6 @@ playlistAddElement.addEventListener("click", () => {
       if (playlistInputElement.value === "") {
         playlistInputElement.value = generatePlaylistName();
       }
-      console.log(playlistInputElement.value);
       // call api to add playlist
       const requestBody = {
         playlistName: playlistInputElement.value,
@@ -159,13 +163,16 @@ function generatePlaylistName() {
 
 // code to render playlistHeading
 function renderPlaylistHeading(playlistName) {
-  const headerElement = document.querySelector(".title");
-  const playlistName = (headerElement.innerHTML = `
+  const headerElement = document.querySelector(".main-panel-header");
+
+  headerElement.innerHTML = `
+  <div class="title">
     <i class="fa-solid fa-folder"></i>
     <input type="text" value="${playlistName}" min-length="3" maxlength="20" class="js-newplaylist-input">
-  `);
+  </div>
+  `;
   //
-  // API to add playlist on Enter
+  // API to rename playlist on Enter
   //
   const playlistInputElement = document.querySelector(".js-newplaylist-input");
   document.body.addEventListener("keydown", (event) => {
@@ -173,7 +180,6 @@ function renderPlaylistHeading(playlistName) {
       if (playlistInputElement.value === "") {
         playlistInputElement.value = generatePlaylistName();
       }
-      console.log(playlistInputElement.value);
       // call api to rename playlist -- needs editing
       const requestBody = {
         playlistName: playlistInputElement.value,
@@ -200,8 +206,30 @@ function renderPlaylistHeading(playlistName) {
 }
 
 // code to render playlistSongs
-function renderPlaylistSongs() {
-  let songDetailsHTML = `
+function renderPlaylistSongs(playlistId) {
+  // get songs from playlistId using api
+
+  fetch(
+    `http://localhost:8888/MusicPlayer/api/v1/playlists/${playlistId}/songs`,
+    {
+      method: "GET",
+    }
+  )
+    .then((response) => {
+      if (response.status === 200) {
+        return response.json();
+      } else if (response.status === 204) {
+        // SHow no content
+        const mainContentElement = document.querySelector(
+          ".js-main-panel-body"
+        );
+        mainContentElement.innerHTML = `<div class="no-song-msg">No Songs In Playlist</div>`;
+      } else {
+        throw new Error("Network response was not ok");
+      }
+    })
+    .then((responseData) => {
+      let songDetailsHTML = `
     <button class="play-btn">
         <i class="fa-solid fa-play"></i>
     </button>
@@ -215,85 +243,39 @@ function renderPlaylistSongs() {
     </div>
     <div class="song-list">";
   `;
-  const playlistSongs = [
-    {
-      duration: "00:00:20",
-      songTitle: "Zombie",
-      songDurationInSecs: 20000,
-      artist: {
-        country: "UK",
-        genre: "Rock",
-        description:
-          'An American singer and actress who gained fame with "Hannah Montana" and hits like "Wrecking Ball."',
-        artistName: "Miley Cyrus",
-        artistId: 2,
-      },
-      genre: "Rock",
-      count: 0,
-      songId: 2,
-      order: 0,
-    },
-    {
-      duration: "00:00:05",
-      songTitle: "Welcome to the Future",
-      songDurationInSecs: 5000,
-      artist: {
-        country: "USA",
-        genre: "Country",
-        description:
-          'An American country singer-songwriter known for hits like "Whiskey Lullaby" and "Mud on the Tires."',
-        artistName: "Brad Paisley",
-        artistId: 3,
-      },
-      genre: "Country",
-      count: 0,
-      songId: 3,
-      order: 0,
-    },
-    {
-      duration: "00:00:10",
-      songTitle: "Sweet Child o' Mine",
-      songDurationInSecs: 10000,
-      artist: {
-        country: "USA",
-        genre: "Rock",
-        description:
-          "Guns N' Roses are a legendary rock band known for their energetic performances and iconic songs.",
-        artistName: "Guns N' Roses",
-        artistId: 10,
-      },
-      genre: "Rock",
-      count: 0,
-      songId: 10,
-      order: 0,
-    },
-  ].forEach((songData, index) => {
-    const {
-      songId,
-      songTitle,
-      artist: { artistName },
-      duration,
-    } = songData;
+      const songs = responseData.data.map(
+        (song) =>
+          new Song(
+            song.songId,
+            song.songTitle,
+            song.artist.artistName,
+            song.duration,
+            song.songUrl,
+            song.imageUrl,
+            song.songUrl
+          )
+      );
+      songs.forEach((songDetails, index) => {
+        songDetailsHTML += `
+        <button class="song-details">
+            <div class="song-number">${index + 1}</div>
+            <div class="song-data">
+                <img src="${songDetails.coverUrl}" width="40px">
+                <div class="song-name">${songDetails.songTitle}</div>
+            </div>
+            <div class="artist-name">${songDetails.artistName}</div>
+            <div class="duration">${songDetails.formatDuration()}</div>
+        </button>
+        `;
+      });
 
-    const songDetails = new Song(songId, songTitle, artistName, duration);
-    console.log(songDetails);
-    console.log(songDetails.formatDuration());
-    songDetailsHTML += `
-    <button class="song-details">
-        <div class="song-number">${index + 1}</div>
-        <div class="song-data">
-            <img src="images/album-cover.jpg" width="40px">
-            <div class="song-name">${songDetails.songTitle}</div>
-        </div>
-        <div class="artist-name">${songDetails.artistName}</div>
-        <div class="duration">${songDetails.formatDuration()}</div>
-    </button>
-    `;
-  });
-
-  songDetailsHTML += "</div>";
-  const songDetailsRender = document.querySelector(".js-main-panel-body");
-  songDetailsRender.innerHTML = songDetailsHTML;
+      songDetailsHTML += "</div>";
+      const songDetailsRender = document.querySelector(".js-main-panel-body");
+      songDetailsRender.innerHTML = songDetailsHTML;
+    })
+    .catch((error) => {
+      console.error("There was a problem with the fetch operation:", error);
+    });
 }
 
 // Function to get liked Songs
@@ -371,6 +353,109 @@ function getLikedSongCount() {
     ],
   };
   const count = responseBody.data.length;
-  console.log(typeof responseBody.data);
   return count;
+}
+
+// code to render playlistSongs
+function renderLikedSongs() {
+  // get songs from playlistId using api
+
+  fetch(`http://localhost:8888/MusicPlayer/api/v1/liked-songs`, {
+    method: "GET",
+  })
+    .then((response) => {
+      if (response.status === 200) {
+        return response.json();
+      } else if (response.status === 204) {
+        // SHow no content
+        const mainContentElement = document.querySelector(
+          ".js-main-panel-body"
+        );
+        mainContentElement.innerHTML = `<div class="no-song-msg">No Songs In Playlist</div>`;
+      } else {
+        throw new Error("Network response was not ok");
+      }
+    })
+    .then((responseData) => {
+      let songDetailsHTML = `
+    <button class="play-btn">
+        <i class="fa-solid fa-play"></i>
+    </button>
+    <div class="song-list-heading">
+        <div class="song-count">#</div>
+        <div>Title</div>
+        <div>Artist</div>
+        <div>
+            <i class="fa-regular fa-clock"></i>
+        </div>
+    </div>
+    <div class="song-list">";
+  `;
+      const songs = responseData.data.map(
+        (song) =>
+          new Song(
+            song.songId,
+            song.songTitle,
+            song.artist.artistName,
+            song.duration,
+            song.songUrl,
+            song.imageUrl,
+            song.songUrl
+          )
+      );
+      songs.forEach((songDetails, index) => {
+        songDetailsHTML += `
+        <button class="song-details">
+            <div class="song-number">${index + 1}</div>
+            <div class="song-data">
+                <img src="${songDetails.coverUrl}" width="40px">
+                <div class="song-name">${songDetails.songTitle}</div>
+            </div>
+            <div class="artist-name">${songDetails.artistName}</div>
+            <div class="duration">${songDetails.formatDuration()}</div>
+        </button>
+        `;
+      });
+
+      songDetailsHTML += "</div>";
+      const songDetailsRender = document.querySelector(".js-main-panel-body");
+      songDetailsRender.innerHTML = songDetailsHTML;
+    })
+    .catch((error) => {
+      console.error("There was a problem with the fetch operation:", error);
+    });
+}
+
+function renderSongListInMain(songs) {
+  let songDetailsHTML = `
+    <button class="play-btn">
+        <i class="fa-solid fa-play"></i>
+    </button>
+    <div class="song-list-heading">
+        <div class="song-count">#</div>
+        <div>Title</div>
+        <div>Artist</div>
+        <div>
+            <i class="fa-regular fa-clock"></i>
+        </div>
+    </div>
+    <div class="song-list">";
+  `;
+  songs.forEach((songDetails, index) => {
+    songDetailsHTML += `
+    <button class="song-details">
+        <div class="song-number">${index + 1}</div>
+        <div class="song-data">
+            <img src="${songDetails.coverUrl}" width="40px">
+            <div class="song-name">${songDetails.songTitle}</div>
+        </div>
+        <div class="artist-name">${songDetails.artistName}</div>
+        <div class="duration">${songDetails.formatDuration()}</div>
+    </button>
+    `;
+  });
+
+  songDetailsHTML += "</div>";
+  const songDetailsRender = document.querySelector(".js-main-panel-body");
+  songDetailsRender.innerHTML = songDetailsHTML;
 }

@@ -34,8 +34,6 @@ class Song {
     const artistElement = document.querySelector(".artist");
     const durationElement = document.querySelector("#duration");
 
-    console.log(typeof durationElement);
-    console.log(typeof this.duration);
     imageElement.src = this.coverUrl;
     songTitleElement.innerText = this.songTitle;
     artistElement.innerText = this.artistName;
@@ -107,10 +105,13 @@ const songDetails = [
 window.onload = () => {
   fetch("http://localhost:8888/MusicPlayer/api/v1/songs?include=songUrl")
     .then((response) => {
-      if (!response.ok) {
+      if (response.ok) {
+        return response.json();
+      } else if (response.status === 204) {
+        // SHow no content
+      } else {
         throw new Error("Network response was not ok");
       }
-      return response.json();
     })
     .then((responseData) => {
       const songs = responseData.data.map(
@@ -125,7 +126,6 @@ window.onload = () => {
             song.songUrl
           )
       );
-      console.log(songs);
       renderSongDetails(songs);
     })
     .catch((error) => {
