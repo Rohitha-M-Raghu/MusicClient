@@ -41,69 +41,20 @@ class Song {
   }
 }
 
-const songDetails = [
-  {
-    songId: 1,
-    songTitle: "Diamonds",
-    artistName: "Rihanna",
-    duration: "00:04:43",
-    songUrl: "songs/Diamonds.mp3",
-    coverUrl: "images/album-cover.jpg",
-  },
-  {
-    songId: 2,
-    songTitle: "Zombie",
-    artistName: "Miley Cyrus",
-    duration: "00:00:20",
-    songUrl: "songs/Zombie.mp3",
-    coverUrl: "images/album-cover.jpg",
-  },
-  {
-    songId: 2,
-    songTitle: "Zombie",
-    artistName: "Miley Cyrus",
-    duration: "00:00:20",
-    songUrl: "songs/Zombie.mp3",
-    coverUrl: "images/album-cover.jpg",
-  },
-  {
-    songId: 2,
-    songTitle: "Zombie",
-    artistName: "Miley Cyrus",
-    duration: "00:00:20",
-    songUrl: "songs/Zombie.mp3",
-    coverUrl: "images/album-cover.jpg",
-  },
-  {
-    songId: 2,
-    songTitle: "Zombie",
-    artistName: "Miley Cyrus",
-    duration: "00:00:20",
-    songUrl: "songs/Zombie.mp3",
-    coverUrl: "images/album-cover.jpg",
-  },
-  {
-    songId: 2,
-    songTitle: "Zombie",
-    artistName: "Miley Cyrus",
-    duration: "00:00:20",
-    songUrl: "songs/Zombie.mp3",
-    coverUrl: "images/album-cover.jpg",
-  },
-].map(
-  (song) =>
-    new Song(
-      song.songId,
-      song.songTitle,
-      song.artistName,
-      song.duration,
-      song.songUrl,
-      song.coverUrl
-    )
-);
+(async () => {
+  async function initialize() {
+    await getSongDetailsInMain();
+  }
 
-window.onload = () => {
-  fetch("http://localhost:8888/MusicPlayer/api/v1/songs?include=songUrl")
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialize);
+  } else {
+    initialize();
+  }
+})();
+
+function getSongDetailsInMain() {
+  return fetch("http://localhost:8888/MusicPlayer/api/v1/songs?include=songUrl")
     .then((response) => {
       if (response.ok) {
         return response.json();
@@ -131,10 +82,7 @@ window.onload = () => {
     .catch((error) => {
       console.error("There was a problem with the fetch operation:", error);
     });
-};
-
-// console.log(songDetails);
-// renderSongDetails(songDetails);
+}
 
 function renderSongDetails(songDetails) {
   const songListElement = document.querySelector(".song-list");

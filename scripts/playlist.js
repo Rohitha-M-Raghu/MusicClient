@@ -9,7 +9,19 @@ class Playlist {
 }
 
 // on load of music.html
-getPlaylistListingInMain();
+// getPlaylistListingInMain();
+
+(async () => {
+  async function initialize() {
+    await getPlaylistListingInMain();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialize);
+  } else {
+    initialize();
+  }
+})();
 
 //
 // List Playlists at left panel
