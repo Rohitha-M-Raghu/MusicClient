@@ -8,6 +8,8 @@ class Playlist {
   }
 }
 
+let playlistsData;
+
 // on load of music.html
 // getPlaylistListingInMain();
 
@@ -85,6 +87,7 @@ function getPlaylistListingInMain() {
             playlist.songCount
           )
       );
+      playlistsData = playlistListingData;
       renderPlaylistListing(playlistListingData);
     })
     .catch((error) => {
@@ -148,6 +151,14 @@ async function renderPlaylistListing(playlistListingData) {
       renderPlaylistHeading(playlistName);
       if (playlistName === "Liked Playlist") {
         // call method to render liked songs
+        // modify play attribute
+        const masterPlayBtnElement = document.querySelector(".play-btn");
+        console.log("Before:", masterPlayBtnElement);
+        masterPlayBtnElement.setAttribute(
+          "data-play-url",
+          "http://localhost:8888/MusicPlayer/api/v1/liked-songs/play"
+        );
+        console.log("After:", masterPlayBtnElement);
         renderLikedSongs();
       } else {
         const playlistId = button.dataset.playlistId;
@@ -208,7 +219,8 @@ function generatePlaylistName() {
   let index = 1;
   while (true) {
     if (
-      !playlistListingData.some(
+      playlistsData &&
+      !playlistsData.some(
         (playlistData) => playlistData.playlistName === `My Playlist#${index}`
       )
     ) {
