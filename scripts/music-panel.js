@@ -7,6 +7,8 @@ const musicPlayerControls = {
   currentTimeElement: document.getElementById("current-time"),
   durationElement: document.getElementById("duration"),
   volumeControl: document.getElementById("volume"),
+  skipNext: document.getElementById("skip-next"),
+  skipPrev: document.getElementById("skip-prev"),
 
   playPausePlayer() {
     if (this.audio.paused) {
@@ -18,6 +20,70 @@ const musicPlayerControls = {
       this.playPauseBtn.classList.remove("fa-pause-circle");
       this.playPauseBtn.classList.add("fa-play-circle");
     }
+  },
+
+  skipToNextTrack() {
+    fetch("http://localhost:8888/MusicPlayer/api/v1/skipToNext", {
+      method: "POST",
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json();
+        } else {
+          throw new Error("Network response was not ok");
+        }
+      })
+      .then((responseData) => {
+        const {
+          songId,
+          songTitle,
+          artist: { artistName },
+          duration,
+          songUrl,
+          imageUrl,
+        } = responseData;
+        const songDetails = new Song(
+          songId,
+          songTitle,
+          artistName,
+          duration,
+          songUrl,
+          imageUrl
+        );
+        this.loadSong(songDetails);
+      });
+  },
+
+  skipToPrevTrack() {
+    fetch("http://localhost:8888/MusicPlayer/api/v1/skipToPrev", {
+      method: "POST",
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json();
+        } else {
+          throw new Error("Network response was not ok");
+        }
+      })
+      .then((responseData) => {
+        const {
+          songId,
+          songTitle,
+          artist: { artistName },
+          duration,
+          songUrl,
+          imageUrl,
+        } = responseData;
+        const songDetails = new Song(
+          songId,
+          songTitle,
+          artistName,
+          duration,
+          songUrl,
+          imageUrl
+        );
+        this.loadSong(songDetails);
+      });
   },
 
   updateProgress() {

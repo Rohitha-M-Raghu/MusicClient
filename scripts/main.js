@@ -10,9 +10,19 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("current-time");
   musicPlayerControls.durationElement = document.getElementById("duration");
   musicPlayerControls.volumeControl = document.getElementById("volume");
+  musicPlayerControls.skipNext = document.getElementById("skip-next");
+  musicPlayerControls.skipPrev = document.getElementById("skip-prev");
 
   musicPlayerControls.playPauseBtn.addEventListener("click", () => {
     musicPlayerControls.playPausePlayer();
+  });
+
+  musicPlayerControls.skipNext.addEventListener("click", () => {
+    musicPlayerControls.skipToNextTrack();
+  });
+
+  musicPlayerControls.skipPrev.addEventListener("click", () => {
+    musicPlayerControls.skipToPrevTrack();
   });
 
   musicPlayerControls.audio.addEventListener("timeupdate", () => {
